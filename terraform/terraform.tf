@@ -4,7 +4,7 @@ terraform {
 
   # Konfiguracja zdalnego przechowywania stanu
   backend "gcs" {
-    bucket  = "publishing-mesh-project-tf-state" # Nazwa bucketu musi być unikalna
+    bucket  = "data-mesh-marketing-tf-state" # Nazwa bucketu musi być unikalna
     prefix  = "terraform/state"                       # Ścieżka wewnątrz bucketu
   }
 

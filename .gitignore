@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# dbt generated artifacts
+dbt/**/target/
+dbt/**/logs/
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# Generated daily Sales ingestion files
+
+logs/
+
+# Generated daily Marketing ingestion files
+marketing/marketing_output/raw/
+
+# Terraform local working directory
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/.terraform/
+# Terraform local files
+terraform_mesh/**/.terraform/
+terraform_mesh/**/*.tfstate
+terraform_mesh/**/*.tfstate.*

@@ -26,3 +26,15 @@ variable "vscode_password" {
   type        = string
   default     = "dbtlab"
 }
+
+
+variable "data_bucket_name" {
+  description = "Main landing bucket for project data"
+  type        = string
+}
+
+variable "data_bucket_location" {
+  description = "Location for the main data bucket"
+  type        = string
+  default     = "EUROPE-CENTRAL2"
+}

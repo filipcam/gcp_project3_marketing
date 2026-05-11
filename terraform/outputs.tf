@@ -28,3 +28,8 @@ output "vscode_password" {
   description = "Hasło do logowania do VS Code Server."
   value       = var.vscode_password
 }
+
+output "data_bucket_name" {
+  value       = google_storage_bucket.project3_marketing_bucket.name
+  description = "Name of the main merketing data bucket"
+}
