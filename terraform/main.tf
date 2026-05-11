@@ -32,6 +32,20 @@ resource "google_storage_bucket_object" "setup_script" {
   source = "${path.module}/scripts/setup.sh"
 }
 
+# Main landing bucket for project data
+resource "google_storage_bucket" "project3_marketing_bucket" {
+  depends_on    = [google_project_service.storage]
+  name          = "${var.project_id}-project3-bucket"
+  location      = var.data_bucket_location
+  storage_class = "STANDARD"
+  force_destroy = false
+
+  uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
+}
+
+
+
 # 2. Konfiguracja sieci (uproszczona - domyślna)
 resource "google_compute_network" "vpc_network" {
   depends_on = [google_project_service.compute]
