@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: orders_curated
+    description: Cleaned order-level sales dataset.
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+
+  - name: order_items_curated
+    description: Cleaned order item-level sales dataset.
+    columns:
+      - name: order_item_id
+        tests:
+          - not_null
+      - name: order_id
+        tests:
+          - not_null
+      - name: book_id
+        tests:
+          - not_null
+
+  - name: sales_daily_summary
+    description: Daily aggregated sales summary.
+
+  - name: top_products
+    description: Product-level sales summary.
+    columns:
+      - name: book_id
+        description: Unique product identifier in the top products aggregation.
+        tests:
+          - not_null
+          - unique

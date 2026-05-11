@@ -1,0 +1,13 @@
+campaign_id,campaign_name,channel,objective,target_segment,start_date,end_date,budget,status,owner_team
+1,Bestseller_Campaign_1,Instagram Ads,conversion,students,2024-05-03,2024-06-02,2498.53,finished,Marketing
+2,Romance_Campaign_2,Facebook Ads,retention,premium_readers,2024-10-25,2024-12-03,7147.06,planned,Marketing
+3,Fantasy_Campaign_3,Google Ads,traffic,students,2024-12-25,2025-01-13,3745.57,finished,Marketing
+4,Weekend_Campaign_4,Affiliate,traffic,students,2024-11-26,2025-01-04,2930.25,planned,Marketing
+5,Winter_Campaign_5,Facebook Ads,traffic,students,2024-09-18,2024-10-16,9445.96,finished,Marketing
+6,Fantasy_Campaign_6,Google Ads,traffic,parents,2024-01-13,2024-02-26,3066.94,finished,Marketing
+7,Autumn_Campaign_7,Google Ads,conversion,returning_customers,2024-06-27,2024-07-30,6202.05,planned,Marketing
+8,Romance_Campaign_8,Google Ads,conversion,new_customers,2024-06-12,2024-06-30,12963.93,finished,Marketing
+9,Autumn_Campaign_9,Facebook Ads,conversion,new_customers,2025-01-14,2025-02-12,7255.99,finished,Marketing
+10,Crime_Campaign_10,Google Ads,conversion,returning_customers,2024-11-18,2024-12-13,11454.74,finished,Marketing
+11,Romance_Campaign_11,Facebook Ads,conversion,new_customers,2024-10-30,2024-12-10,11656.39,finished,Marketing
+12,Summer_Campaign_12,Email,conversion,returning_customers,2024-10-22,2024-11-11,4160.5,planned,Marketing
