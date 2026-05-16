@@ -1,0 +1,67 @@
+version: 2
+
+models:
+  - name: int_campaign_performance
+    description: Aggregated campaign performance metrics built from staging marketing models.
+    columns:
+      - name: campaign_id
+        description: Campaign identifier at campaign grain.
+        tests:
+          - not_null
+        #  - unique
+
+      - name: campaign_name
+        description: Campaign name.
+        tests:
+          - not_null
+
+      - name: channel
+        description: Marketing channel used by the campaign.
+
+      - name: objective
+        description: Marketing objective of the campaign.
+
+      - name: target_segment
+        description: Target audience segment.
+
+      - name: start_date
+        description: Campaign planned start date.
+
+      - name: end_date
+        description: Campaign planned end date.
+
+      - name: budget_amount
+        description: Declared campaign budget.
+
+      - name: status
+        description: Campaign status.
+
+      - name: owner_team
+        description: Owning marketing team.
+
+      - name: total_impressions
+        description: Sum of impressions across all metric rows.
+
+      - name: total_clicks
+        description: Sum of clicks across all metric rows.
+
+      - name: total_cost_amount
+        description: Sum of marketing spend across all metric rows.
+
+      - name: total_sessions
+        description: Sum of sessions across all metric rows.
+
+      - name: total_add_to_cart
+        description: Sum of add to cart events across all metric rows.
+
+      - name: total_conversions
+        description: Sum of conversions across all metric rows.
+
+      - name: ctr
+        description: Click through rate calculated as clicks divided by impressions.
+
+      - name: cpc
+        description: Cost per click calculated as cost divided by clicks.
+
+      - name: cvr
+        description: Conversion rate calculated as conversions divided by clicks.
