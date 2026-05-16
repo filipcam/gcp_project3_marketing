@@ -1,0 +1,30 @@
+version: 2
+
+sources:
+  - name: marketing_raw
+    project: data-mesh-marketing
+    dataset: marketing_raw
+    tables:
+      - name: marketing_campaigns
+        columns:
+          - name: campaign_id
+            tests:
+              - not_null
+
+      - name: marketing_campaign_products
+        columns:
+          - name: campaign_id
+            tests:
+              - not_null
+          - name: book_id
+            tests:
+              - not_null
+
+      - name: marketing_campaign_daily_metrics
+        columns:
+          - name: campaign_id
+            tests:
+              - not_null
+          - name: event_date
+            tests:
+              - not_null

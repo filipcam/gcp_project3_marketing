@@ -1,0 +1,15 @@
+marketing_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: data-mesh-marketing
+      dataset: marketing_dbt_dev
+      threads: 4
+      location: europe-central2
+      priority: interactive
+      job_retries: 1
+      job_execution_timeout_seconds: 300
+
+

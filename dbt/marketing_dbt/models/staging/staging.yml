@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: stg_marketing_campaigns
+    description: Cleaned marketing campaigns source.
+    columns:
+      - name: campaign_id
+        tests:
+          - not_null
+       #   - unique
+      - name: campaign_name
+        tests:
+          - not_null
+
+  - name: stg_marketing_campaign_products
+    description: Cleaned marketing campaign products source.
+    columns:
+      - name: campaign_id
+        tests:
+          - not_null
+      - name: book_id
+        tests:
+          - not_null
+
+  - name: stg_marketing_campaign_daily_metrics
+    description: Cleaned daily campaign metrics source.
+    columns:
+      - name: campaign_id
+        tests:
+          - not_null
+      - name: event_date
+        tests:
+          - not_null
