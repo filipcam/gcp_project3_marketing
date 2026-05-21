@@ -1,6 +1,6 @@
 with source as (
 
-    select * from {{ source('marketing_raw', 'marketing_campaigns') }}
+    select * from {{ source('marketing_raw', 'ext_marketing_campaigns') }}
 
 ),
 
@@ -18,7 +18,6 @@ cleaned as (
         status,
         owner_team,
         load_date,
-        generated_at,
         source_file,
         current_timestamp() as _dbt_loaded_at
     from source

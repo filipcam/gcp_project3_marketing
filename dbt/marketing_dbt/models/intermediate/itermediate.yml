@@ -2,17 +2,19 @@ version: 2
 
 models:
   - name: int_campaign_performance
-    description: Aggregated campaign performance metrics built from staging marketing models.
+    description: >
+      Aggregated campaign performance metrics combining marketing staging models
+      with sales data from publishing-mesh-sales domain (source: top_products, docelowo orders_curated).
     columns:
       - name: campaign_id
         description: Campaign identifier at campaign grain.
-        tests:
+        data_tests:
           - not_null
         #  - unique
 
       - name: campaign_name
         description: Campaign name.
-        tests:
+        data_tests:
           - not_null
 
       - name: channel
@@ -54,14 +56,20 @@ models:
       - name: total_add_to_cart
         description: Sum of add to cart events across all metric rows.
 
-      - name: total_conversions
-        description: Sum of conversions across all metric rows.
+      - name: total_orders
+        description: Sum of orders for books promoted in this campaign. Source - publishing-mesh-sales domain.
+
+      - name: total_items_sold
+        description: Sum of items sold for books promoted in this campaign. Source - publishing-mesh-sales domain.
 
       - name: ctr
-        description: Click through rate calculated as clicks divided by impressions.
+        description: Click-through rate - total_clicks / total_impressions.
 
       - name: cpc
-        description: Cost per click calculated as cost divided by clicks.
+        description: Cost per click - total_cost_amount / total_clicks.
 
       - name: cvr
-        description: Conversion rate calculated as conversions divided by clicks.
+        description: Conversion rate - total_items_sold / total_clicks. Proxy for conversions using sales domain data.
+
+      - name: cost_per_sale
+        description: Marketing cost per sold item - total_cost_amount / total_items_sold.
