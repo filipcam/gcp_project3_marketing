@@ -1,140 +1,44 @@
 version: 2
 
 models:
-  - name: mrt_campaign_performance
-    description: Business-facing campaign performance mart for marketing reporting.
-    columns:
-      - name: campaign_id
-        description: Unique campaign identifier in the mart.
-        tests:
-          - not_null
-          # - unique
-
-      - name: campaign_name
-        description: Campaign display name.
-        tests:
-          - not_null
-
-      - name: channel
-        description: Marketing channel used by the campaign.
-
-      - name: objective
-        description: Campaign objective.
-
-      - name: target_segment
-        description: Target audience segment.
-
-      - name: start_date
-        description: Campaign start date.
-
-      - name: end_date
-        description: Campaign end date.
-
-      - name: budget_amount
-        description: Budget assigned to the campaign.
-
-      - name: status
-        description: Current campaign status.
-
-      - name: owner_team
-        description: Team owning the campaign.
-
-      - name: total_impressions
-        description: Total number of impressions.
-
-      - name: total_clicks
-        description: Total number of clicks.
-
-      - name: total_cost_amount
-        description: Total campaign spend.
-
-      - name: total_sessions
-        description: Total sessions attributed to the campaign.
-
-      - name: total_add_to_cart
-        description: Total add to cart actions attributed to the campaign.
-
-      - name: total_conversions
-        description: Total conversions attributed to the campaign.
-
-      - name: ctr
-        description: Click through rate.
-
-      - name: cpc
-        description: Cost per click.
-
-      - name: cvr
-        description: Conversion rate.
-
   - name: mrt_campaign_daily_performance
-    description: Daily campaign performance mart for reporting and trend analysis.
+    description: Daily campaign performance metrics. Internal marketing model.
     columns:
       - name: campaign_id
-        description: Campaign identifier.
-        tests:
+        data_tests:
           - not_null
-
       - name: event_date
-        description: Date of the metric row.
-        tests:
+        data_tests:
           - not_null
 
-      - name: campaign_name
-        description: Campaign display name.
+  - name: mrt_campaign_performance
+    description: >
+      Aggregated campaign performance combining media metrics with sales data
+      from publishing-mesh-sales domain. Internal marketing summary model.
+    columns:
+      - name: campaign_id
+        data_tests:
+          - not_null
+          - unique
+      - name: performance_segment
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['no_reach', 'no_clicks', 'traffic_only', 'converting']
 
-      - name: channel
-        description: Marketing channel used by the campaign.
-
-      - name: objective
-        description: Campaign objective.
-
-      - name: target_segment
-        description: Target audience segment.
-
-      - name: start_date
-        description: Campaign start date.
-
-      - name: end_date
-        description: Campaign end date.
-
-      - name: budget_amount
-        description: Budget assigned to the campaign.
-
-      - name: status
-        description: Current campaign status.
-
-      - name: owner_team
-        description: Team owning the campaign.
-
-      - name: source_system
-        description: Source system for daily metrics.
-
-      - name: impressions
-        description: Daily number of impressions.
-
-      - name: clicks
-        description: Daily number of clicks.
-
-      - name: cost_amount
-        description: Daily campaign spend.
-
-      - name: sessions
-        description: Daily number of sessions.
-
-      - name: add_to_cart
-        description: Daily number of add to cart actions.
-
-      - name: conversions
-        description: Daily number of conversions.
-
-      - name: ctr
-        description: Daily click through rate.
-
-      - name: cpc
-        description: Daily cost per click.
-
-      - name: cvr
-        description: Daily conversion rate.
-
-      # Docelowo można dodać test unikalności na grain:
-      # campaign_id + event_date
+  - name: mrt_campaign_sales_attribution
+    description: >
+      Published data product for the Marketing domain.
+      Stable interface exposing campaign-to-book attribution with sales metrics.
+      Grain: one row per campaign_id + book_id combination.
+      Source of sales data: publishing-mesh-sales domain (top_products, docelowo orders_curated).
+    columns:
+      - name: campaign_id
+        data_tests:
+          - not_null
+      - name: book_id
+        data_tests:
+          - not_null
+      - name: total_items_sold
+        data_tests:
+          - not_null

@@ -2,29 +2,48 @@ version: 2
 
 sources:
   - name: marketing_raw
-    project: data-mesh-marketing
-    dataset: marketing_raw
+    database: data-mesh-marketing
+    schema: marketing_raw
     tables:
-      - name: marketing_campaigns
+      - name: ext_marketing_campaigns
         columns:
           - name: campaign_id
-            tests:
+            data_tests:
               - not_null
 
-      - name: marketing_campaign_products
+      - name: ext_marketing_campaign_products
         columns:
           - name: campaign_id
-            tests:
+            data_tests:
               - not_null
           - name: book_id
-            tests:
+            data_tests:
               - not_null
 
-      - name: marketing_campaign_daily_metrics
+      - name: ext_marketing_campaign_daily_metrics
         columns:
           - name: campaign_id
-            tests:
+            data_tests:
               - not_null
           - name: event_date
-            tests:
+            data_tests:
+              - not_null
+
+  - name: sales
+    database: publishing-mesh-sales
+    schema: sales_products
+    description: "Dane sprzedażowe domeny Publishing. Tymczasowo top_products - docelowo zastąpić orders_curated."
+    tables:
+      - name: top_products
+        description: "MVP source - zagregowane dane sprzedażowe per book_id. Docelowo zastąpić orders_curated."
+        columns:
+          - name: book_id
+            data_tests:
+              - not_null
+              - unique
+          - name: total_orders
+            data_tests:
+              - not_null
+          - name: total_items_sold
+            data_tests:
               - not_null
