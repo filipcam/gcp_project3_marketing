@@ -1,3 +1,10 @@
+{{
+    config(
+        materialized='table',
+        description='Published data product. Dzienna wydajność kampanii mediowych. Stable interface.'
+    )
+}}
+
 with campaigns as (
 
     select
@@ -47,20 +54,19 @@ final as (
         dm.event_date,
         dm.source_system,
 
-        coalesce(dm.impressions, 0)   as impressions,
-        coalesce(dm.clicks, 0)        as clicks,
-        coalesce(dm.cost_amount, 0)   as cost_amount,
-        coalesce(dm.sessions, 0)      as sessions,
-        coalesce(dm.add_to_cart, 0)   as add_to_cart,
+        coalesce(dm.impressions,  0) as impressions,
+        coalesce(dm.clicks,       0) as clicks,
+        coalesce(dm.cost_amount,  0) as cost_amount,
+        coalesce(dm.sessions,     0) as sessions,
+        coalesce(dm.add_to_cart,  0) as add_to_cart,
 
-        safe_divide(dm.clicks, dm.impressions)  as ctr,
-        safe_divide(dm.cost_amount, dm.clicks)  as cpc,
+        safe_divide(dm.clicks,      dm.impressions) as ctr,
+        safe_divide(dm.cost_amount, dm.clicks)      as cpc,
 
         current_timestamp() as _dbt_loaded_at
 
     from daily_metrics dm
-    left join campaigns c
-        on dm.campaign_id = c.campaign_id
+    left join campaigns c using (campaign_id)
 
 )
 

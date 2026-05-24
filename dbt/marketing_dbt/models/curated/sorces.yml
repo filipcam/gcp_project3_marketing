@@ -32,18 +32,17 @@ sources:
   - name: sales
     database: publishing-mesh-sales
     schema: sales_products
-    description: "Dane sprzedażowe domeny Publishing. Tymczasowo top_products - docelowo zastąpić orders_curated."
+    description: "Dane sprzedażowe domeny Publishing."
     tables:
-      - name: top_products
-        description: "MVP source - zagregowane dane sprzedażowe per book_id. Docelowo zastąpić orders_curated."
+      - name: book_daily_sales
+        description: "Dzienna sprzedaż książek per book_id. Zastępuje top_products (MVP)."
         columns:
           - name: book_id
             data_tests:
               - not_null
-              - unique
-          - name: total_orders
+          - name: sales_date
             data_tests:
               - not_null
-          - name: total_items_sold
+          - name: gross_sales_amount
             data_tests:
               - not_null
