@@ -1,0 +1,54 @@
+version: 2
+
+models:
+  - name: stg_marketing_campaigns
+    description: "Staging kampanii marketingowych. Czyszczenie i standaryzacja źródła ext_marketing_campaigns."
+    columns:
+      - name: campaign_id
+        data_tests:
+          - not_null
+          - unique
+
+  - name: stg_marketing_campaign_products
+    description: "Staging przypisania książek do kampanii."
+    columns:
+      - name: campaign_id
+        data_tests:
+          - not_null
+      - name: book_id
+        data_tests:
+          - not_null
+
+  - name: stg_marketing_campaign_daily_metrics
+    description: "Staging dziennych metryk mediowych kampanii."
+    columns:
+      - name: campaign_id
+        data_tests:
+          - not_null
+      - name: event_date
+        data_tests:
+          - not_null
+
+  - name: stg_book_daily_sales
+    description: "Staging dziennej sprzedaży książek. Zastępuje top_products (MVP). Źródło: publishing-mesh-sales."
+    columns:
+      - name: book_id
+        data_tests:
+          - not_null
+      - name: sales_date
+        data_tests:
+          - not_null
+      - name: gross_sales_amount
+        data_tests:
+          - not_null
+
+  - name: int_campaign_performance
+    description: >
+      Model pośredni łączący kampanie z metrykami mediowymi i sprzedażą.
+      Sprzedaż ograniczona do okna czasowego kampanii (start_date – end_date).
+      Używany wyłącznie wewnętrznie przez warstwę published.
+    columns:
+      - name: campaign_id
+        data_tests:
+          - not_null
+          - unique

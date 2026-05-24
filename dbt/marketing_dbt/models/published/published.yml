@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: pub_campaign_daily_performance
+    description: "Dzienna wydajność kampanii mediowych. Stable interface — nie zmieniaj kolumn bez konsultacji."
+    columns:
+      - name: campaign_id
+        data_tests:
+          - not_null
+      - name: event_date
+        data_tests:
+          - not_null
+
+  - name: pub_campaign_performance
+    description: "Zagregowana skuteczność kampanii. Stable interface."
+    columns:
+      - name: campaign_id
+        data_tests:
+          - not_null
+          - unique
+
+  - name: pub_campaign_sales_attribution
+    description: >
+      Atrybucja sprzedaży per kampania i książka. Udostępniana zespołowi Sales.
+      Sprzedaż z book_daily_sales ograniczona do okna kampanii (start_date – end_date).
+      Stable interface — zmiany kolumn wymagają synchronizacji z domeną Sales.
+    columns:
+      - name: campaign_id
+        data_tests:
+          - not_null
+      - name: book_id
+        data_tests:
+          - not_null

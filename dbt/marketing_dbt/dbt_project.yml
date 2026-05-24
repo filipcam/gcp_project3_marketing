@@ -2,14 +2,23 @@ name: 'marketing_dbt'
 version: '1.0.0'
 profile: 'marketing_dbt'
 
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
 models:
   marketing_dbt:
-    staging:
-      +schema: marketing_silver
+    curated:
+      +schema: marketing_curated
       +materialized: view
-    intermediate:
-      +schema: marketing_silver
-      +materialized: view
-    marts:
+    published:
       +schema: marketing_published
       +materialized: table
