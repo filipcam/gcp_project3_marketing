@@ -4,7 +4,7 @@ import os
 import random
 import tempfile
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from decimal import Decimal, ROUND_HALF_UP
 from typing import List, Dict, Set, Tuple
 
@@ -15,7 +15,7 @@ from google.cloud import storage
 DEFAULT_PROJECT_ID = "data-mesh-marketing"
 DEFAULT_DATASET = "marketing_raw"
 DEFAULT_BUCKET = "data-mesh-marketing-project3-bucket"
-DEFAULT_CATALOG_TABLE = "publishing-mesh-project.catalog.books"
+DEFAULT_INVENTORY_TABLE = "publishing-mesh-logistics.logistics_products.inventory_by_book"
 DEFAULT_CAMPAIGNS_TABLE = "data-mesh-marketing.marketing_raw.ext_marketing_campaigns"
 DEFAULT_METRICS_TABLE = "data-mesh-marketing.marketing_raw.ext_marketing_campaign_daily_metrics"
 
@@ -38,9 +38,6 @@ CAMPAIGN_NAME_SUFFIXES = [
 @dataclass
 class Book:
     book_id: int
-    title: str
-    category: str
-    format: str
 
 
 @dataclass
@@ -61,7 +58,9 @@ def parse_args():
             "Generate marketing data and upload CSV files to GCS.\n"
             "\n"
             "Logika per load_date:\n"
-            "  - Zawsze: nowe kampanie\n"
+            "  - Źródło książek: inventory_by_book gdzie snapshot_date = load_date - 1\n"
+            "    i total_stock_available > 0 (tylko dostępne w magazynie)\n"
+            "  - Zawsze: nowe kampanie (co najmniej 1 aktywna na load_date)\n"
             "  - Produkty: tylko kampanie z start_date == load_date\n"
             "  - Metryki: wszystkie aktywne kampanie, bez duplikatów\n"
         )
@@ -69,7 +68,7 @@ def parse_args():
     parser.add_argument("--project-id", default=DEFAULT_PROJECT_ID)
     parser.add_argument("--dataset", default=DEFAULT_DATASET)
     parser.add_argument("--bucket", default=DEFAULT_BUCKET)
-    parser.add_argument("--catalog-table", default=DEFAULT_CATALOG_TABLE)
+    parser.add_argument("--inventory-table", default=DEFAULT_INVENTORY_TABLE)
     parser.add_argument("--campaigns-table", default=DEFAULT_CAMPAIGNS_TABLE)
     parser.add_argument("--metrics-table", default=DEFAULT_METRICS_TABLE)
     parser.add_argument("--load-date", required=True, help="Load date in YYYY-MM-DD format")
@@ -120,23 +119,36 @@ def get_max_campaign_id(client: bigquery.Client, campaigns_table: str) -> int:
         return 0
 
 
-def load_catalog_books(client: bigquery.Client, catalog_table: str) -> List[Book]:
-    query = f"""
-    SELECT book_id, title, category, format
-    FROM `{catalog_table}`
-    WHERE book_id IS NOT NULL
+def load_available_books(
+    client: bigquery.Client,
+    inventory_table: str,
+    load_date: date
+) -> List[Book]:
     """
-    rows = client.query(query).result()
-    books = []
-    for row in rows:
-        books.append(Book(
-            book_id=int(row.book_id),
-            title=row.title or "unknown_title",
-            category=(row.category or "unknown").lower().replace(" ", "_"),
-            format=(row.format or "unknown").lower().replace(" ", "_"),
-        ))
+    Pobiera book_id dostępnych w magazynie na dzień poprzedni względem load_date.
+    Filtr: snapshot_date = load_date - 1 AND total_stock_available > 0.
+    Używamy load_date - 1 bo snapshot z bieżącego dnia może jeszcze nie istnieć.
+    """
+    snapshot_date = (load_date - timedelta(days=1)).isoformat()
+    query = f"""
+    SELECT DISTINCT book_id
+    FROM `{inventory_table}`
+    WHERE snapshot_date = DATE('{snapshot_date}')
+      AND total_stock_available > 0
+      AND book_id IS NOT NULL
+    """
+    try:
+        rows = list(client.query(query).result())
+        books = [Book(book_id=int(row.book_id)) for row in rows]
+    except Exception as e:
+        raise RuntimeError(f"Could not load inventory data: {e}")
+
     if not books:
-        raise ValueError("No books found in catalog table.")
+        raise ValueError(
+            f"No books with total_stock_available > 0 found in inventory "
+            f"for snapshot_date={snapshot_date}. "
+            f"Cannot generate campaign products."
+        )
     return books
 
 
@@ -202,9 +214,16 @@ def build_campaign_name(load_date: date, idx: int) -> str:
     return f"{prefix}_{suffix}_{load_date.strftime('%Y%m%d')}_{idx}"
 
 
-def generate_campaign_dates(load_date: date) -> Tuple[date, date]:
-    start_offset = random.randint(0, 3)
-    start_date = load_date + timedelta(days=start_offset)
+def generate_campaign_dates(load_date: date, force_start_today: bool = False) -> Tuple[date, date]:
+    """
+    force_start_today=True  → start_date == load_date (gwarantuje aktywność i generowanie produktów)
+    force_start_today=False → start_date = load_date + 0..3 dni (może być planned)
+    """
+    if force_start_today:
+        start_date = load_date
+    else:
+        start_offset = random.randint(0, 3)
+        start_date = load_date + timedelta(days=start_offset)
     duration_days = random.randint(7, 28)
     end_date = start_date + timedelta(days=duration_days)
     return start_date, end_date
@@ -216,10 +235,15 @@ def generate_campaigns(
     num_campaigns: int,
     source_file: str
 ) -> List[Dict]:
+    """
+    Pierwsza kampania (i=0) zawsze startuje na load_date — gwarantuje
+    co najmniej 1 aktywną kampanię i co najmniej 1 plik products per run.
+    """
     campaigns = []
     for i in range(num_campaigns):
         campaign_id = start_campaign_id + i + 1
-        start_date, end_date = generate_campaign_dates(load_date)
+        force_today = (i == 0)
+        start_date, end_date = generate_campaign_dates(load_date, force_start_today=force_today)
         budget_amount = decimal_2(random.uniform(1500, 15000))
         status = "planned" if start_date > load_date else "active"
         campaigns.append({
@@ -253,7 +277,8 @@ def generate_campaign_products(
 ) -> List[Dict]:
     """
     Generuje produkty TYLKO dla kampanii których start_date == load_date.
-    Brak discount_pct i promo_price — ceny należą do domeny sprzedaży.
+    Książki pochodzą z inventory_by_book (snapshot_date = load_date - 1,
+    total_stock_available > 0) — marketing promuje tylko dostępne pozycje.
     """
     rows = []
     max_pick = min(books_max, len(books))
@@ -281,7 +306,7 @@ def generate_campaign_products(
 
 
 # ---------------------------------------------------------------------------
-# Generators — daily metrics (bez conversions — pochodzi ze sprzedaży)
+# Generators — daily metrics
 # ---------------------------------------------------------------------------
 
 def _build_metric_row(
@@ -406,6 +431,7 @@ def main():
         raise ValueError("--num-campaigns must be >= 1")
 
     load_date = date.fromisoformat(args.load_date)
+    snapshot_date = load_date - timedelta(days=1)
 
     if args.random_seed is not None:
         random.seed(args.random_seed)
@@ -416,9 +442,9 @@ def main():
     # -----------------------------------------------------------------------
     # 1. Dane referencyjne
     # -----------------------------------------------------------------------
-    print(f"[1/5] Loading catalog books from {args.catalog_table}...")
-    books = load_catalog_books(bq_client, args.catalog_table)
-    print(f"      Loaded {len(books)} books.")
+    print(f"[1/5] Loading available books from inventory (snapshot_date={snapshot_date})...")
+    books = load_available_books(bq_client, args.inventory_table, load_date)
+    print(f"      Books with stock available: {len(books)}")
 
     print(f"[2/5] Reading current max campaign_id from {args.campaigns_table}...")
     max_campaign_id = get_max_campaign_id(bq_client, args.campaigns_table)
@@ -515,6 +541,10 @@ def main():
         assert len(metric_pairs_in_batch) == len(set(metric_pairs_in_batch)), \
             "FATAL: duplicate (campaign_id, event_date) in generated metrics!"
 
+        active_in_batch = [c for c in campaigns if c["status"] == "active"]
+        assert len(active_in_batch) >= 1, \
+            "FATAL: no active campaigns generated for this load_date!"
+
         # -----------------------------------------------------------------------
         # 6. Upload GCS
         # -----------------------------------------------------------------------
@@ -543,6 +573,8 @@ def main():
     print()
     print("=" * 60)
     print("Generation completed successfully.")
+    print(f"  Inventory snapshot_date         : {snapshot_date}")
+    print(f"  Books available in stock        : {len(books)}")
     print(f"  New campaigns generated         : {len(campaigns)}")
     print(f"  Campaigns starting today        : {starting_today}")
     print(f"  Product rows generated          : {len(products)}")
