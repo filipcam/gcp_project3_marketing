@@ -13,14 +13,15 @@ Thumbs.db
 # dbt generated artifacts
 dbt/**/target/
 dbt/**/logs/
+dbt/**/.user.yml
 
 # Temporary files
 *.tmp
 *.swp
+*.bak
 *~
 
-# Generated daily Sales ingestion files
-
+# log files
 logs/
 
 # Generated daily Marketing ingestion files
@@ -30,8 +31,3 @@ marketing/marketing_output/raw/
 terraform/.terraform/
 terraform/*.tfstate
 terraform/*.tfstate.*
-terraform/.terraform/
-# Terraform local files
-terraform_mesh/**/.terraform/
-terraform_mesh/**/*.tfstate
-terraform_mesh/**/*.tfstate.*
