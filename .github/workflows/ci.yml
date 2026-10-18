@@ -1,0 +1,19 @@
+name: python-files-compile-check
+on:
+  push:
+    branches: [main]            # push only on main
+  pull_request:
+    branches: [main]            # only PRs directed to main
+  workflow_dispatch:            # Run workflow button in the UI
+jobs:
+  python-compile:                         # job name = status check name
+    runs-on: ubuntu-latest       # latest Ubuntu VM
+    steps:
+      - uses: actions/checkout@v7      # v7 = action version, check the latest in Releases
+      - uses: actions/setup-python@v7   # check the latest in Releases
+        with:
+         python-version: '3.12'
+      - run: python -m compileall airflow  # compile all .py files in the airflow directory
+      - run: python -m compileall data_generator  # compile all .py files in the data_generator directory
+
+
