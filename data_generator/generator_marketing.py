@@ -36,7 +36,7 @@ CAMPAIGN_NAME_SUFFIXES = [
 
 
 @dataclass
-class Book:
+class Book
     book_id: int
 
 
