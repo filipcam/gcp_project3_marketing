@@ -1,0 +1,19 @@
+name: python-files-compile-check
+on:
+  push:
+    branches: [main]            # push odpala tylko na main, nie na feature/*
+  pull_request:
+    branches: [main]            # tylko PR-y kierowane do main
+  workflow_dispatch:            # przycisk Run workflow w UI
+jobs:
+  python-compile:                         # nazwa joba = nazwa status checka
+    runs-on: ubuntu-latest       # obraz VM udostępniany przez GitHub
+    steps:
+      - uses: actions/checkout@v7      # v7 = wersja akcji, patrz ramka niżej; bez tego kroku VM nie ma Twojego kodu
+      - uses: actions/setup-python@v7   # aktualny numer sprawdź w Releases, jak przy checkout
+        with:
+         python-version: '3.12'
+      - run: python -m compileall airflow  # kompilacja wszystkich plików .py w katalogu airflow/dags
+      - run: python -m compileall data_generator  # kompilacja wszystkich plików .py w katalogu data_generator
+
+
